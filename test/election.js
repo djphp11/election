@@ -33,15 +33,19 @@ contract("Election", function(accounts) {
       candidateId = 1;
       return electionInstance.vote(candidateId, { from: accounts[0] });
     }).then(function(receipt) {
-    	return electionInstance.voters(accounts[0]);
+      assert.equal(receipt.logs.length, 1, "an event was triggered");
+      assert.equal(receipt.logs[0].event, "votedEvent", "the event type is correct");
+      assert.equal(receipt.logs[0].args._candidateId.toNumber(), candidateId, "the candidate id is correct");
+      return electionInstance.voters(accounts[0]);
     }).then(function(voted) {
-    	assert(voted, "the voter was marked as voted");
-    	return electionInstance.candidates(candidateId);
+      assert(voted, "the voter was marked as voted");
+      return electionInstance.candidates(candidateId);
     }).then(function(candidate) {
-    	var voteCount = candidate[2];
-    	assert.equal(voteCount, 1, "increments the candidate's vote count");
+      var voteCount = candidate[2];
+      assert.equal(voteCount, 1, "increments the candidate's vote count");
     })
-});
+  });
+
   it("throws an exception for invalid candiates", function() {
     return Election.deployed().then(function(instance) {
       electionInstance = instance;
@@ -82,7 +86,4 @@ contract("Election", function(accounts) {
       assert.equal(voteCount, 1, "candidate 2 did not receive any votes");
     });
   });
-
-
-  
 });
